@@ -2,17 +2,21 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const port = 8888;
+const port = process.env.PORT || 8888;
 const { database } = require("./config");
-const userRouter = require("./routes/user.routes");
+const { secret } = require("./config");
+const routes = require("./routes/index");
 const expressSwagger = require("express-swagger-generator")(app);
 const swaggerUi = require("express-swaggerize-ui");
+const cors = require("cors");
 
 mongoose.connect(
   database,
   { useNewUrlParser: true }
 );
 mongoose.set("useCreateIndex", true);
+app.set("superSecret", secret);
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -20,13 +24,14 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
+    "Authorization",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   next();
 });
 
-app.use("/api", userRouter);
+app.use("/api", routes);
 
 let options = {
   swaggerDefinition: {
@@ -59,7 +64,7 @@ const server = app.listen(port, function() {
 //===================================================
 
 const io = require("socket.io").listen(server);
-var User = require("./models/user.model");
+const User = require("./models/user.model");
 
 io.on("connection", socket => {
   console.log("connected socket: ", socket.id);
