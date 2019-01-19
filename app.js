@@ -1,21 +1,27 @@
-var express = require("express");
-var app = express();
-var bodyParser = require("body-parser");
-var mongoose = require("mongoose");
-var port = 8888;
-var { database } = require("./config");
-var userRouter = require("./routes/user.routes");
-var expressSwagger = require("express-swagger-generator")(app);
-var swaggerUi = require("express-swaggerize-ui");
+const express = require("express");
+const app = express();
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const port = 8888;
+const { database } = require("./config");
+const userRouter = require("./routes/user.routes");
+const expressSwagger = require("express-swagger-generator")(app);
+const swaggerUi = require("express-swaggerize-ui");
 
-mongoose.connect(database, { useNewUrlParser: true });
-mongoose.set('useCreateIndex', true);
+mongoose.connect(
+  database,
+  { useNewUrlParser: true }
+);
+mongoose.set("useCreateIndex", true);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   next();
 });
@@ -44,7 +50,56 @@ app.use("/api-docs.json", function(req, res) {
 });
 app.use("/api-docs", swaggerUi());
 
-
-app.listen(port, function() {
+const server = app.listen(port, function() {
   console.log(`Server is listening ${port} port`);
 });
+
+//===================================================
+//    Socket IO
+//===================================================
+
+const io = require("socket.io").listen(server);
+var User = require("./models/user.model");
+
+io.on("connection", socket => {
+  console.log("connected socket: ", socket.id);
+
+  socket.on("getUsers", () => {
+    User.find({}).exec((err, users) => {
+      if (err) {
+        socket.emit("error", err);
+      } else {
+        socket.emit("users", users);
+      }
+    });
+  });
+
+  socket.on("addUser", user => {
+    var newUser = new User(user);
+
+    newUser.save((err, user) => {
+      if (err) {
+        socket.emit("error", err);
+      } else {
+        socket.emit("user", [user]);
+      }
+    });
+  });
+
+  socket.on("removeUser", id => {
+    User.findOneAndRemove(
+      {
+        _id: id
+      },
+      (err, user) => {
+        if (err) {
+          socket.emit("error", err);
+        } else {
+          socket.emit("user", [user]);
+        }
+      }
+    );
+  });
+});
+
+//========================================================

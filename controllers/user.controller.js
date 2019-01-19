@@ -1,7 +1,6 @@
 var User = require("../models/user.model");
 
 exports.default = (req, res) => {
-  console.log('req: ', req);
   res.send("HELLO WORLD");
 };
 

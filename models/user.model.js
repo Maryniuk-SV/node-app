@@ -11,7 +11,7 @@ module.exports = mongoose.model(
     },
     password: {
       type: String,
-      unique: true,
+      unique: false,
       required: true
     },
     email: {
