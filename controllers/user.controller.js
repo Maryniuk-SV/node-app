@@ -7,9 +7,9 @@ exports.default = (req, res) => {
 exports.getAllUsers = (req, res) => {
   User.find({}).exec((err, users) => {
     if (err) {
-      res.json({ message: "getAllUsers", error: err });
+      res.status(403).json({ message: "getAllUsers", error: err });
     } else {
-      res.json(users);
+      res.status(200).json(users);
     }
   });
 };
@@ -19,9 +19,9 @@ exports.getUserById = (req, res) => {
     _id: req.params.id
   }).exec((err, user) => {
     if (err) {
-      res.json({ message: "getUserById", error: err });
+      res.status(403).json({ message: "getUserById", error: err });
     } else {
-      res.json(user);
+      res.status(200).json(user);
     }
   });
 };
@@ -31,9 +31,9 @@ exports.createUser = (req, res) => {
 
   newUser.save((err, user) => {
     if (err) {
-      res.json({ message: "createUser", error: err });
+      res.status(403).json({ message: "createUser", error: err });
     } else {
-      res.json(user);
+      res.status(200).json(user);
     }
   });
 };
@@ -51,9 +51,9 @@ exports.updateUser = (req, res) => {
     },
     (err, newUser) => {
       if (err) {
-        res.json({ message: "updateUser", error: err });
+        res.status(403).json({ message: "updateUser", error: err });
       } else {
-        res.json(newUser);
+        res.status(200).json(newUser);
       }
     }
   );
@@ -66,9 +66,9 @@ exports.removeUser = (req, res) => {
     },
     (err, user) => {
       if (err) {
-        res.json({ message: "removeUser", error: err });
+        res.status(403).json({ message: "removeUser", error: err });
       } else {
-        res.json({ message: `The user with id ${req.params.id} was deleted!` });
+        res.status(200).json({ message: `The user with id ${req.params.id} was deleted!` });
       }
     }
   );
@@ -77,9 +77,9 @@ exports.removeUser = (req, res) => {
 exports.removeAllUsers = (req, res) => {
   User.remove({}, (err, user) => {
     if (err) {
-      res.json({ message: "removeAllUsers", error: err });
+      res.status(403).json({ message: "removeAllUsers", error: err });
     } else {
-      res.json({ message: `Users were deleted!` });
+      res.status(200).json({ message: `Users were deleted!` });
     }
   });
 };
